@@ -17,7 +17,7 @@ def arg_parse():
     parser.add_argument('--outputdir', dest='outputdir')
     parser.set_defaults(datadir='/XGNN/Mutagenicity',
                         prefix='Mutagenicity',
-                        epochs=80,
+                        epochs=10000,
                         seed=200,
                         cuda=torch.cuda.is_available(),
                         lr=0.001,

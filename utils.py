@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import scipy.sparse as sp
 import torch
@@ -125,8 +127,9 @@ def load_split_MUTAG_data(path="MUTAG/", dataset="MUTAG_", split_train=0.7, spli
     """Load MUTAG data """
     print('Loading {} dataset...'.format(dataset))
 
-    labels = np.genfromtxt("{}{}graph_labels.txt".format(path, dataset),
+    labels = np.genfromtxt(os.path.join(path, "{}graph_labels.txt".format(dataset)),
                            dtype=np.dtype(int))
+
     labels = encode_onehot(labels)
     labels = torch.LongTensor(np.where(labels)[1])
 

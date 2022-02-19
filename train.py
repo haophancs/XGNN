@@ -2,7 +2,6 @@ import argparse
 import time
 
 import numpy as np
-import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
@@ -10,9 +9,16 @@ from configs import arg_parse
 from models import *
 from utils import *
 
-adj_list, features_list, labels, idx_map, idx_train, idx_val, idx_test = load_split_MUTAG_data()
 
 args = arg_parse()
+
+print('Prepairing...')
+adj_list, features_list, labels, idx_map, idx_train, idx_val, idx_test = load_split_MUTAG_data(
+    path=args.datadir,
+    dataset=args.prefix
+)
+print('Preparation done')
+
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 if args.cuda:
@@ -125,12 +131,13 @@ class EarlyStopping():
 
 
 # Train model
+print('Start training...')
 t_total = time.time()
 early_stopping = EarlyStopping(10, hit_min_before_stopping=True)
 
-for epoch in range(10000):
+for epoch in range(args.epochs):
     loss_train, acc_train, loss_val, acc_val = train(epoch)
-    print(loss_val)
+    print(f'Epoch #{epoch}', loss_val)
     early_stopping(loss_val)
     if early_stopping.early_stop == True:
         break
@@ -149,4 +156,6 @@ acc_test = accuracy(output, labels[idx_test])
 print(loss_test)
 print(acc_test)
 
+
+print(f'Model saved at {args.outputdir}')
 torch.save(model.state_dict(), args.outputdir)
