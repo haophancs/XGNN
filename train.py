@@ -128,30 +128,35 @@ class EarlyStopping:
 
 
 # Train model
-print('Start training...')
-t_total = time.time()
-early_stopping = EarlyStopping(10, hit_min_before_stopping=True)
+def main():
+    print('Start training...')
+    t_total = time.time()
+    early_stopping = EarlyStopping(10, hit_min_before_stopping=True)
 
-for epoch in range(args.epochs):
-    loss_train, acc_train, loss_val, acc_val = train(epoch)
-    print(loss_val)
-    early_stopping(loss_val)
-    if early_stopping.early_stop == True:
-        break
+    for epoch in range(args.epochs):
+        loss_train, acc_train, loss_val, acc_val = train(epoch)
+        print(loss_val)
+        early_stopping(loss_val)
+        if early_stopping.early_stop == True:
+            break
 
-print("Optimization Finished!")
-print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
+    print("Optimization Finished!")
+    print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
-output = None
-for i in idx_test:
-    if output is None:
-        output = model(features_list[i], adj_list[i], idx_map)
-    else:
-        output = torch.vstack((output, model(features_list[i], adj_list[i], idx_map)))
-loss_test = F.cross_entropy(output, labels[idx_test])
-acc_test = accuracy(output, labels[idx_test])
-print(loss_test)
-print(acc_test)
+    output = None
+    for i in idx_test:
+        if output is None:
+            output = model(features_list[i], adj_list[i], idx_map)
+        else:
+            output = torch.vstack((output, model(features_list[i], adj_list[i], idx_map)))
+    loss_test = F.cross_entropy(output, labels[idx_test])
+    acc_test = accuracy(output, labels[idx_test])
+    print(loss_test)
+    print(acc_test)
 
-print(f'Model saved at {args.model_path}')
-torch.save(model.state_dict(), args.model_path)
+    print(f'Model saved at {args.model_path}')
+    torch.save(model.state_dict(), args.model_path)
+
+
+if __name__ == '__main__':
+    main()
