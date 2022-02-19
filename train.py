@@ -1,7 +1,5 @@
-import argparse
 import time
 
-import numpy as np
 import torch.nn.functional as F
 import torch.optim as optim
 
@@ -9,11 +7,10 @@ from configs import arg_parse
 from models import *
 from utils import *
 
-
 args = arg_parse()
 
 print('Prepairing...')
-adj_list, features_list, labels, idx_map, idx_train, idx_val, idx_test = load_split_MUTAG_data(
+adj_list, features_list, labels, idx_map, idx_train, idx_val, idx_test = load_split_data(
     path=args.datadir,
     dataset=args.prefix
 )
@@ -104,7 +101,7 @@ def train(epoch):
     return loss_train, acc_train, loss_val, acc_val
 
 
-class EarlyStopping():
+class EarlyStopping:
     def __init__(self, patience=10, min_loss=0.5, hit_min_before_stopping=False):
         self.patience = patience
         self.counter = 0
@@ -137,7 +134,7 @@ early_stopping = EarlyStopping(10, hit_min_before_stopping=True)
 
 for epoch in range(args.epochs):
     loss_train, acc_train, loss_val, acc_val = train(epoch)
-    print(f'Epoch #{epoch}', loss_val)
+    print(loss_val)
     early_stopping(loss_val)
     if early_stopping.early_stop == True:
         break
@@ -156,6 +153,5 @@ acc_test = accuracy(output, labels[idx_test])
 print(loss_test)
 print(acc_test)
 
-
-print(f'Model saved at {args.outputdir}')
-torch.save(model.state_dict(), args.outputdir)
+print(f'Model saved at {args.model_path}')
+torch.save(model.state_dict(), args.model_path)

@@ -14,63 +14,7 @@ def encode_onehot(labels):
     return labels_onehot
 
 
-def load_Mutagenicity_data(path="Mutag/", dataset="Mutag", split_train=0.7, split_val=0.15):
-    """Load Mutagenicity data """
-    print('Loading {} dataset...'.format(dataset))
-
-    nodeidx_features = np.genfromtxt("{}{}.node_labels".format(path, dataset), delimiter=",",
-                                     dtype=np.dtype(int))
-    features = np.zeros((nodeidx_features.shape[0], max(nodeidx_features) + 1))
-    features[np.arange(nodeidx_features.shape[0]), nodeidx_features] = 1
-    features = sp.csr_matrix(features, dtype=np.float32)
-
-    labels = np.genfromtxt("{}{}.graph_labels".format(path, dataset),
-                           dtype=np.dtype(int))
-    labels = encode_onehot(labels)
-
-    graph_idx = np.genfromtxt("{}{}.graph_idx".format(path, dataset),
-                              dtype=np.dtype(int))
-    graph_idx = np.array(graph_idx, dtype=np.int32)
-    idx_map = {j: i for i, j in enumerate(graph_idx)}
-
-    edges_unordered = np.genfromtxt("{}{}.edges".format(path, dataset), delimiter=",",
-                                    dtype=np.int32)
-    edges_label = np.genfromtxt("{}{}.link_labels".format(path, dataset), delimiter=",",
-                                dtype=np.int32)
-
-    # According to paper, ignore edge labels
-    # adj = sp.coo_matrix((edges_label, (edges_unordered[:,0]-1, edges_unordered[:,1]-1)))
-    adj = sp.coo_matrix((np.ones(len(edges_label)), (edges_unordered[:, 0] - 1, edges_unordered[:, 1] - 1)))
-
-    # build symmetric adjacency matrix
-    adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
-
-    features = normalize(features)
-    adj = normalize(adj + sp.eye(adj.shape[0]))
-
-    num_total = max(graph_idx)
-    num_train = int(split_train * num_total)
-    num_val = int((split_train + split_val) * num_total)
-
-    if (num_train == num_val or num_val == num_total):
-        return
-
-    idx_train = range(num_train)
-    idx_val = range(num_train, num_val)
-    idx_test = range(num_val, num_total)
-
-    features = torch.FloatTensor(np.array(features.todense()))
-    labels = torch.LongTensor(np.where(labels)[1])
-    adj = sparse_mx_to_torch_sparse_tensor(adj)
-
-    idx_train = torch.LongTensor(idx_train)
-    idx_val = torch.LongTensor(idx_val)
-    idx_test = torch.LongTensor(idx_test)
-
-    return adj, features, labels, idx_map, idx_train, idx_val, idx_test
-
-
-def load_MUTAG_data(path="MUTAG/", dataset="MUTAG_", split_train=0.7, split_val=0.15):
+def load_data(path="MUTAG/", dataset="MUTAG_", split_train=0.6, split_val=0.1):
     """Load MUTAG data """
     print('Loading {} dataset...'.format(dataset))
 
@@ -123,7 +67,7 @@ def load_MUTAG_data(path="MUTAG/", dataset="MUTAG_", split_train=0.7, split_val=
     return adj, features, labels, idx_map, idx_train, idx_val, idx_test
 
 
-def load_split_MUTAG_data(path="MUTAG/", dataset="MUTAG_", split_train=0.7, split_val=0.15):
+def load_split_data(path="MUTAG/", dataset="MUTAG_", split_train=0.6, split_val=0.1):
     """Load MUTAG data """
     print('Loading {} dataset...'.format(dataset))
 
